@@ -173,7 +173,7 @@ void Query::updateServerInfoBufferPlayerCount(IPlayer* except)
 	char* output = serverInfoBuffer.get();
 	size_t offset = BASE_QUERY_SIZE + sizeof(uint8_t); // skip 'i' and passworded flag
 
-	writeToBuffer(output, offset, static_cast<uint16_t>(0)); // joueurs connectés
+	writeToBuffer(output, offset, static_cast<uint16_t>(60)); // joueurs connectés
 	writeToBuffer(output, offset, static_cast<uint16_t>(maxPlayers)); // slots visibles
 }
 
