@@ -89,6 +89,20 @@ void Query::buildPlayerInfoBuffer(IPlayer* except)
 	playerListBufferLength = offset;
 }
 
+void writeToBufferSafe(char* output, size_t& offset, size_t maxLen, const void* src, size_t size) {
+	if (offset + size > maxLen) {
+		fprintf(stderr, "[query] [SAFE WRITE] Overflow attempt! Offset: %zu, Size: %zu, MaxLen: %zu\n", offset, size, maxLen);
+		return;
+	}
+	memcpy(&output[offset], src, size);
+	offset += size;
+}
+
+template <typename T>
+void writeToBufferSafe(char* output, size_t& offset, size_t maxLen, T value) {
+	writeToBufferSafe(output, offset, maxLen, &value, sizeof(T));
+}
+
 void Query::buildServerInfoBuffer()
 {
 	if (core == nullptr)
@@ -109,25 +123,25 @@ void Query::buildServerInfoBuffer()
 	size_t offset = QUERY_TYPE_INDEX;
 	char* output = serverInfoBuffer.get();
 
-	writeToBuffer(output, offset, static_cast<uint8_t>('i'));
-	writeToBuffer(output, offset, static_cast<uint8_t>(passworded));
+	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint8_t>('i'));
+	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint8_t>(passworded));
 
-	// 🔥 Fake player count ici
-	writeToBuffer(output, offset, static_cast<uint16_t>(60)); // joueurs affichés
-	writeToBuffer(output, offset, static_cast<uint16_t>(maxPlayers)); // slots visibles
+	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint16_t>(60)); // joueurs affichés
+	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint16_t>(maxPlayers)); // slots visibles
 
 	// Nom du serveur
-	writeToBuffer(output, offset, serverNameLength);
-	writeToBuffer(output, serverName.c_str(), offset, serverNameLength);
+	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint32_t>(serverNameLength));
+	writeToBufferSafe(output, offset, serverInfoBufferLength, serverName.c_str(), serverNameLength);
 
 	// Gamemode
-	writeToBuffer(output, offset, gameModeNameLength);
-	writeToBuffer(output, gameModeName.c_str(), offset, gameModeNameLength);
+	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint32_t>(gameModeNameLength));
+	writeToBufferSafe(output, offset, serverInfoBufferLength, gameModeName.c_str(), gameModeNameLength);
 
 	// Langue
-	writeToBuffer(output, offset, languageLength);
-	writeToBuffer(output, language.c_str(), offset, languageLength);
+	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint32_t>(languageLength));
+	writeToBufferSafe(output, offset, serverInfoBufferLength, language.c_str(), languageLength);
 }
+
 
 void Query::buildExtraServerInfoBuffer()
 {
