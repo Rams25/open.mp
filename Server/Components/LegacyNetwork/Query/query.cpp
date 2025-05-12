@@ -108,8 +108,9 @@ void Query::buildServerInfoBuffer()
 	// Write `i` signal and player count details
 	writeToBuffer(output, offset, static_cast<uint8_t>('i'));
 	writeToBuffer(output, offset, static_cast<uint8_t>(passworded));
-	writeToBuffer(output, offset, static_cast<uint16_t>(core->getPlayers().players().size()));
-	writeToBuffer(output, offset, static_cast<uint16_t>(maxPlayers - core->getPlayers().bots().size()));
+	writeToBuffer(output, offset, static_cast<uint16_t>(0)); // <-- joueurs connectés
+	writeToBuffer(output, offset, static_cast<uint16_t>(maxPlayers));
+
 
 	// Write server name
 	writeToBuffer(output, offset, serverNameLength);
@@ -291,12 +292,6 @@ Span<const char> Query::handleQuery(Span<const char> buffer, uint32_t sock, cons
 		return Span<char>();
 	}
 
-	// Bloquer requêtes 'i' et 'c' (infos + liste joueurs)
-	if (buffer[QUERY_TYPE_INDEX] == 'i' || buffer[QUERY_TYPE_INDEX] == 'c')
-	{
-		return Span<char>(); // Ne rien renvoyer
-	}
-
 	if (logQueries)
 	{
 		PeerAddress::AddressString addrString;
@@ -318,11 +313,24 @@ Span<const char> Query::handleQuery(Span<const char> buffer, uint32_t sock, cons
 	}
 	else if (buffer.size() == BASE_QUERY_SIZE)
 	{
-		// Extra infos (open.mp spécifique)
+		// This is how we detect open.mp, but also let's send some extra data
 		if (buffer[QUERY_TYPE_INDEX] == 'o')
 		{
 			return getBuffer(buffer, extraInfoBuffer, extraInfoBufferLength);
 		}
+
+		// Server info
+		else if (buffer[QUERY_TYPE_INDEX] == 'i')
+		{
+			return getBuffer(buffer, serverInfoBuffer, serverInfoBufferLength);
+		}
+
+		// Players
+		else if (buffer[QUERY_TYPE_INDEX] == 'c')
+		{
+			return {};
+		}
+
 		// Rules
 		else if (buffer[QUERY_TYPE_INDEX] == 'r' && rulesBuffer)
 		{
@@ -337,4 +345,3 @@ Span<const char> Query::handleQuery(Span<const char> buffer, uint32_t sock, cons
 
 	return Span<char>();
 }
-
