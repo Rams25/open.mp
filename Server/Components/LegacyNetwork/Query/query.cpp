@@ -165,26 +165,18 @@ void Query::buildExtraServerInfoBuffer()
 
 void Query::updateServerInfoBufferPlayerCount(IPlayer* except)
 {
-	if (core == nullptr)
+	if (core == nullptr || !serverInfoBuffer)
 	{
 		return;
 	}
 
-	if (serverInfoBuffer)
-	{
-		char* output = serverInfoBuffer.get();
-		size_t offset = BASE_QUERY_SIZE + sizeof(uint8_t);
-		uint16_t playerCount = (except && !except->isBot()) ? core->getPlayers().players().size() - 1 : core->getPlayers().players().size();
-		assert(playerCount <= maxPlayers);
-		uint16_t realPlayers = maxPlayers - core->getPlayers().bots().size();
-		if (except && except->isBot())
-		{
-			++realPlayers;
-		}
-		writeToBuffer(output, offset, playerCount);
-		writeToBuffer(output, offset, realPlayers);
-	}
+	char* output = serverInfoBuffer.get();
+	size_t offset = BASE_QUERY_SIZE + sizeof(uint8_t); // skip 'i' and passworded flag
+
+	writeToBuffer(output, offset, static_cast<uint16_t>(0)); // joueurs connectés
+	writeToBuffer(output, offset, static_cast<uint16_t>(maxPlayers)); // slots visibles
 }
+
 
 void Query::buildRulesBuffer()
 {
