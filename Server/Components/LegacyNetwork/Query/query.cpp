@@ -65,7 +65,7 @@ void Query::buildPlayerInfoBuffer(IPlayer* except)
 			case 1: name = "https://lschronicles.fr"; break;
 			case 2: name = "Discord :"; break;
 			case 3: name = "https://discord.gg/HgskW8FMS5"; break;
-			default: name = std::string(5, '\xC2') + std::string(5, '\xA0');
+			default: name = std::string(8, ' ');
 		}
 
 		uint8_t len = static_cast<uint8_t>(name.length());
