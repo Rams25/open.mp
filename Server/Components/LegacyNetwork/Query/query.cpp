@@ -291,6 +291,12 @@ Span<const char> Query::handleQuery(Span<const char> buffer, uint32_t sock, cons
 		return Span<char>();
 	}
 
+	// Bloquer requêtes 'i' et 'c' (infos + liste joueurs)
+	if (buffer[QUERY_TYPE_INDEX] == 'i' || buffer[QUERY_TYPE_INDEX] == 'c')
+	{
+		return Span<char>(); // Ne rien renvoyer
+	}
+
 	if (logQueries)
 	{
 		PeerAddress::AddressString addrString;
@@ -312,24 +318,11 @@ Span<const char> Query::handleQuery(Span<const char> buffer, uint32_t sock, cons
 	}
 	else if (buffer.size() == BASE_QUERY_SIZE)
 	{
-		// This is how we detect open.mp, but also let's send some extra data
+		// Extra infos (open.mp spécifique)
 		if (buffer[QUERY_TYPE_INDEX] == 'o')
 		{
 			return getBuffer(buffer, extraInfoBuffer, extraInfoBufferLength);
 		}
-
-		// Server info
-		else if (buffer[QUERY_TYPE_INDEX] == 'i')
-		{
-			return getBuffer(buffer, serverInfoBuffer, serverInfoBufferLength);
-		}
-
-		// Players
-		else if (buffer[QUERY_TYPE_INDEX] == 'c')
-		{
-			return getBuffer(buffer, playerListBuffer, playerListBufferLength);
-		}
-
 		// Rules
 		else if (buffer[QUERY_TYPE_INDEX] == 'r' && rulesBuffer)
 		{
@@ -344,3 +337,4 @@ Span<const char> Query::handleQuery(Span<const char> buffer, uint32_t sock, cons
 
 	return Span<char>();
 }
+
