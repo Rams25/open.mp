@@ -50,10 +50,10 @@ void Query::buildPlayerInfoBuffer(IPlayer* except)
 	// Simuler 4 faux joueurs
 	constexpr int fakeCount = 4;
 	const char* fakeNames[fakeCount] = {
-		"forum",
-		"lschronicles.fr",
-		"discord",
-		".gg/xyzljid"
+		"Forum :",
+		"https://lschronicles.fr",
+		"Discord :",
+		"https://discord.gg/HgskW8FMS5"
 	};
 
 	playerListBufferLength = BASE_QUERY_SIZE + sizeof(uint16_t) + (sizeof(uint8_t) + MAX_PLAYER_NAME + sizeof(int32_t)) * fakeCount;
@@ -175,7 +175,7 @@ void Query::buildExtraServerInfoBuffer()
 
 void Query::updateServerInfoBufferPlayerCount(IPlayer* except)
 {
-	if (core == nullptr || !serverInfoBuffer)
+	/*if (core == nullptr || !serverInfoBuffer)
 	{
 		return;
 	}
@@ -184,7 +184,7 @@ void Query::updateServerInfoBufferPlayerCount(IPlayer* except)
 	size_t offset = BASE_QUERY_SIZE + sizeof(uint8_t); // skip 'i' and passworded flag
 
 	writeToBuffer(output, offset, static_cast<uint16_t>(60)); // joueurs connectés
-	writeToBuffer(output, offset, static_cast<uint16_t>(maxPlayers)); // slots visibles
+	writeToBuffer(output, offset, static_cast<uint16_t>(maxPlayers)); // slots visibles*/
 }
 
 
