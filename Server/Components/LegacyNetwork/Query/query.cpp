@@ -47,47 +47,39 @@ void Query::buildPlayerInfoBuffer(IPlayer* except)
 		return;
 	}
 
-	const FlatPtrHashSet<IPlayer>& players = core->getPlayers().players();
-	const uint16_t playerCount = (except && !except->isBot()) ? players.size() - 1 : players.size();
+	// Simuler 4 faux joueurs
+	constexpr int fakeCount = 4;
+	const char* fakeNames[fakeCount] = {
+		"forum",
+		"lschronicles.fr",
+		"discord",
+		".gg/xyzljid"
+	};
 
-	if (playerCount > 100)
-	{
-		playerListBuffer.reset();
-		playerListBufferLength = 0;
-		return;
-	}
-
-	assert(playerCount <= maxPlayers);
-	playerListBufferLength = BASE_QUERY_SIZE + sizeof(uint16_t) + (sizeof(uint8_t) + MAX_PLAYER_NAME + sizeof(int32_t)) * playerCount;
+	playerListBufferLength = BASE_QUERY_SIZE + sizeof(uint16_t) + (sizeof(uint8_t) + MAX_PLAYER_NAME + sizeof(int32_t)) * fakeCount;
 	playerListBuffer.reset(new char[playerListBufferLength]);
 	size_t offset = QUERY_TYPE_INDEX;
 	char* output = playerListBuffer.get();
 
-	// Write 'c' signal and player count
+	// Header 'c' (liste joueurs)
 	writeToBuffer(output, offset, static_cast<uint8_t>('c'));
-	writeToBuffer(output, offset, playerCount);
+	writeToBuffer(output, offset, static_cast<uint16_t>(fakeCount));
 
-	for (IPlayer* player : players)
+	// Ajout des faux joueurs
+	for (int i = 0; i < fakeCount; ++i)
 	{
-		if (player == except)
-		{
-			continue;
-		}
+		const char* name = fakeNames[i];
+		uint8_t len = static_cast<uint8_t>(strlen(name));
 
-		StringView playerName = player->getName();
-
-		// Write player name
-		const uint8_t playerNameLength = static_cast<uint8_t>(playerName.length());
-		writeToBuffer(output, offset, playerNameLength);
-		writeToBuffer(output, playerName.data(), offset, playerNameLength);
-
-		// Write player score
-		writeToBuffer(output, offset, static_cast<int32_t>(player->getScore()));
+		writeToBuffer(output, offset, len);
+		writeToBuffer(output, name, offset, len);
+		writeToBuffer(output, offset, static_cast<int32_t>(0)); // score = 0
 	}
 
-	// Don't read (and send) uninitialized memory
+	// Mise à jour de la taille réelle
 	playerListBufferLength = offset;
 }
+
 
 void writeToBufferSafe(char* output, size_t& offset, size_t maxLen, const void* src, size_t size) {
 	if (offset + size > maxLen) {
@@ -338,7 +330,7 @@ Span<const char> Query::handleQuery(Span<const char> buffer, uint32_t sock, cons
 		// Players
 		else if (buffer[QUERY_TYPE_INDEX] == 'c')
 		{
-			return {};
+			return getBuffer(buffer, playerListBuffer, playerListBufferLength);
 		}
 
 		// Rules
