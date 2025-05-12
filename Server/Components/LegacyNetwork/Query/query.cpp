@@ -47,38 +47,36 @@ void Query::buildPlayerInfoBuffer(IPlayer* except)
 		return;
 	}
 
-	// Simuler 4 faux joueurs
-	constexpr int fakeCount = 4;
-	const char* fakeNames[fakeCount] = {
-		"Forum :",
-		"https://lschronicles.fr",
-		"Discord :",
-		"https://discord.gg/HgskW8FMS5"
-	};
-
+	constexpr int fakeCount = 60;
 	playerListBufferLength = BASE_QUERY_SIZE + sizeof(uint16_t) + (sizeof(uint8_t) + MAX_PLAYER_NAME + sizeof(int32_t)) * fakeCount;
 	playerListBuffer.reset(new char[playerListBufferLength]);
 	size_t offset = QUERY_TYPE_INDEX;
 	char* output = playerListBuffer.get();
 
-	// Header 'c' (liste joueurs)
 	writeToBuffer(output, offset, static_cast<uint8_t>('c'));
 	writeToBuffer(output, offset, static_cast<uint16_t>(fakeCount));
 
-	// Ajout des faux joueurs
 	for (int i = 0; i < fakeCount; ++i)
 	{
-		const char* name = fakeNames[i];
-		uint8_t len = static_cast<uint8_t>(strlen(name));
+		std::string name;
+		switch (i)
+		{
+			case 0: name = "Forum :"; break;
+			case 1: name = "https://lschronicles.fr"; break;
+			case 2: name = "Discord :"; break;
+			case 3: name = "https://discord.gg/HgskW8FMS5"; break;
+			default: name = std::string(5, '\xC2') + std::string(5, '\xA0');
+		}
 
+		uint8_t len = static_cast<uint8_t>(name.length());
 		writeToBuffer(output, offset, len);
-		writeToBuffer(output, name, offset, len);
-		writeToBuffer(output, offset, static_cast<int32_t>(0)); // score = 0
+		writeToBuffer(output, name.c_str(), offset, len);
+		writeToBuffer(output, offset, static_cast<int32_t>(0)); // score
 	}
 
-	// Mise à jour de la taille réelle
 	playerListBufferLength = offset;
 }
+
 
 
 void writeToBufferSafe(char* output, size_t& offset, size_t maxLen, const void* src, size_t size) {
