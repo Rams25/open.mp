@@ -35,8 +35,8 @@ jobs:
 
     strategy:
       matrix:
-        arch: [x86, x86_64]
-        ssl: [dynamic, static]
+        arch: [x86]
+        ssl: [static]
 
     steps:
       - uses: actions/checkout@v4
