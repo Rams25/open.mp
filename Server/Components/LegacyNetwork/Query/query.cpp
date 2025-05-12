@@ -100,27 +100,31 @@ void Query::buildServerInfoBuffer()
 	uint32_t gameModeNameLength = std::min(gameModeName.length(), MAX_ACCEPTABLE_GMTEXT_SIZE);
 	uint32_t languageLength = std::min(language.length(), MAX_ACCEPTABLE_LANGUAGE_SIZE);
 
-	serverInfoBufferLength = BASE_QUERY_SIZE + sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint16_t) + sizeof(serverNameLength) + serverNameLength + sizeof(gameModeNameLength) + gameModeNameLength + sizeof(languageLength) + languageLength;
+	serverInfoBufferLength = BASE_QUERY_SIZE + sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint16_t) +
+	                         sizeof(serverNameLength) + serverNameLength +
+	                         sizeof(gameModeNameLength) + gameModeNameLength +
+	                         sizeof(languageLength) + languageLength;
+
 	serverInfoBuffer.reset(new char[serverInfoBufferLength]);
 	size_t offset = QUERY_TYPE_INDEX;
 	char* output = serverInfoBuffer.get();
 
-	// Write `i` signal and player count details
 	writeToBuffer(output, offset, static_cast<uint8_t>('i'));
 	writeToBuffer(output, offset, static_cast<uint8_t>(passworded));
-	writeToBuffer(output, offset, static_cast<uint16_t>(0)); // <-- joueurs connectés
-	writeToBuffer(output, offset, static_cast<uint16_t>(maxPlayers));
 
+	// 🔥 Fake player count ici
+	writeToBuffer(output, offset, static_cast<uint16_t>(60)); // joueurs affichés
+	writeToBuffer(output, offset, static_cast<uint16_t>(maxPlayers)); // slots visibles
 
-	// Write server name
+	// Nom du serveur
 	writeToBuffer(output, offset, serverNameLength);
 	writeToBuffer(output, serverName.c_str(), offset, serverNameLength);
 
-	// Write gamemode name
+	// Gamemode
 	writeToBuffer(output, offset, gameModeNameLength);
 	writeToBuffer(output, gameModeName.c_str(), offset, gameModeNameLength);
 
-	// Write language name (since 0.3.7, it was map name before that)
+	// Langue
 	writeToBuffer(output, offset, languageLength);
 	writeToBuffer(output, language.c_str(), offset, languageLength);
 }
