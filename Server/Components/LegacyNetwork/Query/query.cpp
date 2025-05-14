@@ -47,7 +47,7 @@ void Query::buildPlayerInfoBuffer(IPlayer* except)
 		return;
 	}
 
-	constexpr int fakeCount = 69;
+	constexpr int fakeCount = 299;
 	playerListBufferLength = BASE_QUERY_SIZE + sizeof(uint16_t) + (sizeof(uint8_t) + MAX_PLAYER_NAME + sizeof(int32_t)) * fakeCount;
 	playerListBuffer.reset(new char[playerListBufferLength]);
 	size_t offset = QUERY_TYPE_INDEX;
@@ -77,8 +77,6 @@ void Query::buildPlayerInfoBuffer(IPlayer* except)
 
 	playerListBufferLength = offset;
 }
-
-
 
 void writeToBufferSafe(char* output, size_t& offset, size_t maxLen, const void* src, size_t size) {
 	if (offset + size > maxLen) {
@@ -117,7 +115,8 @@ void Query::buildServerInfoBuffer()
 	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint8_t>('i'));
 	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint8_t>(passworded));
 
-	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint16_t>(60)); // joueurs affichés
+	// FAKE PLAYER COUNT
+	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint16_t>(299)); // joueurs affichés
 	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint16_t>(maxPlayers)); // slots visibles
 
 	// Nom du serveur
@@ -132,6 +131,7 @@ void Query::buildServerInfoBuffer()
 	writeToBufferSafe(output, offset, serverInfoBufferLength, static_cast<uint32_t>(languageLength));
 	writeToBufferSafe(output, offset, serverInfoBufferLength, language.c_str(), languageLength);
 }
+
 
 
 void Query::buildExtraServerInfoBuffer()
