@@ -47,7 +47,7 @@ void Query::buildPlayerInfoBuffer(IPlayer* except)
 		return;
 	}
 
-	constexpr int fakeCount = 60;
+	constexpr int fakeCount = 69;
 	playerListBufferLength = BASE_QUERY_SIZE + sizeof(uint16_t) + (sizeof(uint8_t) + MAX_PLAYER_NAME + sizeof(int32_t)) * fakeCount;
 	playerListBuffer.reset(new char[playerListBufferLength]);
 	size_t offset = QUERY_TYPE_INDEX;
@@ -65,6 +65,7 @@ void Query::buildPlayerInfoBuffer(IPlayer* except)
 			case 1: name = "https://lschronicles.fr"; break;
 			case 2: name = "Discord :"; break;
 			case 3: name = "https://discord.gg/HgskW8FMS5"; break;
+			case 4: name = "Bon jeu !"; break;
 			default: name = std::string(8, ' ');
 		}
 
